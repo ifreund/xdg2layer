@@ -8,7 +8,7 @@ const Client = @import("Client.zig");
 const Server = @import("Server.zig");
 
 const interface = c.struct_wl_shm_interface{
-    .create_pool = handleCreatePool,
+    .create_pool = requestCreatePool,
 };
 
 wl_shm: *c.wl_shm,
@@ -28,9 +28,13 @@ fn bind(wl_client: ?*c.wl_client, data: ?*c_void, version: u32, id: u32) callcon
         return;
     };
     c.wl_resource_set_implementation(wl_resource, &interface, self);
+
+    // TODO: listen for format event forward other formats
+    wl_shm_send_format(resource, WL_SHM_FORMAT_ARGB8888);
+    wl_shm_send_format(resource, WL_SHM_FORMAT_XRGB8888);
 }
 
-fn handleCreatePool(
+fn requestCreatePool(
     wl_client: *c.wl_client,
     wl_resource: *c.wl_resource,
     id: u32,
