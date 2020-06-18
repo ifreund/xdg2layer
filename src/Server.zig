@@ -2,10 +2,14 @@ const Self = @This();
 
 const c = @import("c.zig");
 
+const Shm = @import("Shm.zig");
+const Compositor = @import("Compositor.zig");
+
 wl_display: *c.wl_display,
 wl_event_loop: *c.wl_event_loop,
 
 shm: Shm,
+compositor: Compositor,
 
 pub fn init(self: *Self) !void {
     self.wl_display = c.wl_display_create() orelse return error.OutOfMemory;

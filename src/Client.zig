@@ -37,6 +37,12 @@ fn handleGlobal(
             *c.wl_seat,
             c.wl_registry_bind(wl_registry, name, &c.wl_shm_interface, 1),
         );
-        self.server.shm.init(wl_shm) catch @panic("shm init failed");
+        self.server.shm.init(self.server, wl_shm);
+    } else if (std.cstr.cmp(interface.?, @ptrCast([*:0]const u8, c.wl_compositor_interface.name.?)) == 0) {
+        const wl_compositor = @ptrCast(
+            *c.wl_seat,
+            c.wl_registry_bind(wl_registry, name, &c.wl_compositor_interface, 1),
+        );
+        self.server.compositor.init(self.server, wl_compositor);
     }
 }

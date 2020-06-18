@@ -13,11 +13,11 @@ const interface = c.struct_wl_shm_interface{
 
 wl_shm: *c.wl_shm,
 
-pub fn init(self: *Self, server: *Server, client: *Client, wl_shm: *c.wl_shm) !void {
+pub fn init(self: *Self, server: *Server, client: *Client, wl_shm: *c.wl_shm) void {
     self.wl_shm = wl_shm;
 
     wl_global_create(server.wl_display, &wl_shm_interface, 1, self, bind) orelse
-        return error.CantCreateWlGlobal;
+        @panic("shm init failed");
 }
 
 fn bind(wl_client: ?*c.wl_client, data: ?*c_void, version: u32, id: u32) callconv(.C) void {

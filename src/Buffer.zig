@@ -30,5 +30,5 @@ fn requestDestroy(wl_client: ?*c.wl_client, wl_resource: ?*c.wl_resource) callco
 
 fn eventRelease(data: ?*c_void, wl_buffer: *c.wl_buffer) callconv(.C) void {
     const self = @intToPtr(*Self, @ptrToInt(data));
-    wl_buffer_send_release(welf.wl_resource);
+    c.wl_buffer_send_release(self.wl_resource);
 }
