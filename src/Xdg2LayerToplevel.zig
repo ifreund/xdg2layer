@@ -55,6 +55,9 @@ pub fn init(
     self.wlr_layer_surface = wlr_layer_surface;
     self.wl_resource = wl_resource;
     self.serial_map = std.AutoHashMap(u32, u32).init(util.allocator);
+
+    c.zwlr_layer_surface_v1_set_size(self.wlr_layer_surface, 128, 128);
+
     if (c.zwlr_layer_surface_v1_add_listener(wlr_layer_surface, &listener, self) < 0)
         @panic("failed to add layer surface listener");
 }
