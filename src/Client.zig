@@ -43,6 +43,12 @@ fn handleGlobal(
             c.wl_registry_bind(wl_registry, name, &c.wl_compositor_interface, 1),
         );
         self.server.compositor.init(self.server, wl_compositor);
+    } else if (std.cstr.cmp(interface.?, @ptrCast([*:0]const u8, c.zwlr_layer_shell_v1_interface.name.?)) == 0) {
+        const wlr_layer_shell = @ptrCast(
+            *c.zwlr_layer_shell_v1,
+            c.wl_registry_bind(wl_registry, name, &c.zwlr_layer_shell_v1_interface, 1),
+        );
+        self.server.xdg2layer_shell.init(self.server, wlr_layer_shell);
     }
 }
 
