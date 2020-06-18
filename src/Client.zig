@@ -20,6 +20,41 @@ pub fn init(self: *Self, server: *Server) !void {
     if (c.wl_registry_add_listener(wl_registry, &wl_registry_listener, self) < 0)
         return error.FailedToAddListener;
     if (c.wl_display_roundtrip(self.wl_display) < 0) return error.RoundtripFailed;
+
+    const fd = c.wl_display_get_fd(self.wl_display);
+    const mask = c.WL_EVENT_READABLE | c.WL_EVENT_HANGUP | c.WL_EVENT_ERROR;
+    const wl_event_source = c.wl_event_loop_add_fd(
+        server.wl_event_loop,
+        fd,
+        mask,
+        dispatchEvents,
+        self,
+    ) orelse return error.CantAddEventSource;
+    c.wl_event_source_check(wl_event_source);
+}
+
+fn dispatchEvents(fd: c_int, mask: u32, data: ?*c_void) callconv(.C) c_int {
+    const self = @intToPtr(*Self, @ptrToInt(data));
+    if ((mask & @as(u32, c.WL_EVENT_HANGUP) != 0) or (mask & @as(u32, c.WL_EVENT_ERROR) != 0)) {
+        c.wl_display_terminate(self.server.wl_display);
+        return 0;
+    }
+
+    var count: c_int = 0;
+
+    if (mask & @as(u32, c.WL_EVENT_READABLE) != 0) count = c.wl_display_dispatch(self.wl_display);
+    if (mask & @as(u32, c.WL_EVENT_WRITABLE) != 0) _ = c.wl_display_flush(self.wl_display);
+    if (mask == 0) {
+        count = c.wl_display_dispatch_pending(self.wl_display);
+        _ = c.wl_display_flush(self.wl_display);
+    }
+
+    if (count < 0) {
+        c.wl_display_terminate(self.server.wl_display);
+        return 0;
+    }
+
+    return count;
 }
 
 fn handleGlobal(
