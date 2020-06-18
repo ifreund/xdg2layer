@@ -9,7 +9,7 @@ const Region = @import("Region.zig");
 const Server = @import("Server.zig");
 const Surface = @import("Surface.zig");
 
-const interface = c.struct_wl_shm_interface{
+const interface = c.struct_wl_compositor_interface{
     .create_surface = requestCreateSurface,
     .create_region = requestCreateRegion,
 };
@@ -19,26 +19,31 @@ wl_compositor: *c.wl_compositor,
 pub fn init(self: *Self, server: *Server, wl_compositor: *c.wl_compositor) void {
     self.wl_compositor = wl_compositor;
 
-    wl_global_create(server.wl_display, &wl_compositor_interface, 4, self, bind) orelse
+    _ = c.wl_global_create(server.wl_display, &c.wl_compositor_interface, 4, self, bind) orelse
         @panic("compositor init failed");
 }
 
 fn bind(wl_client: ?*c.wl_client, data: ?*c_void, version: u32, id: u32) callconv(.C) void {
     const self = @intToPtr(*Self, @ptrToInt(data));
 
-    const wl_resource = c.wl_resource_create(wl_client, &c.wl_compositor_interface, version, id) orelse {
+    const wl_resource = c.wl_resource_create(
+        wl_client,
+        &c.wl_compositor_interface,
+        @intCast(i32, version),
+        id,
+    ) orelse {
         c.wl_client_post_no_memory(wl_client);
         return;
     };
-    c.wl_resource_set_implementation(wl_resource, &interface, self);
+    c.wl_resource_set_implementation(wl_resource, &interface, self, null);
 }
 
 fn requestCreateSurface(
-    wl_client: *c.wl_client,
-    wl_resource: *c.wl_resource,
+    wl_client: ?*c.wl_client,
+    wl_resource: ?*c.wl_resource,
     id: u32,
 ) callconv(.C) void {
-    const self = @intToPtr(*Self, @ptrToInt(data));
+    const self = @intToPtr(*Self, @ptrToInt(c.wl_resource_get_user_data(wl_resource)));
 
     const surface = util.allocator.create(Surface) catch {
         c.wl_client_post_no_memory(wl_client);
@@ -61,11 +66,11 @@ fn requestCreateSurface(
 }
 
 fn requestCreateRegion(
-    wl_client: *c.wl_client,
-    wl_resource: *c.wl_resource,
+    wl_client: ?*c.wl_client,
+    wl_resource: ?*c.wl_resource,
     id: u32,
 ) callconv(.C) void {
-    const self = @intToPtr(*Self, @ptrToInt(data));
+    const self = @intToPtr(*Self, @ptrToInt(c.wl_resource_get_user_data(wl_resource)));
 
     const region = util.allocator.create(Region) catch {
         c.wl_client_post_no_memory(wl_client);
