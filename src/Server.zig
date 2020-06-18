@@ -4,6 +4,7 @@ const c = @import("c.zig");
 
 const Compositor = @import("Compositor.zig");
 const Shm = @import("Shm.zig");
+const Subcompositor = @import("Subcompositor.zig");
 const Xdg2LayerShell = @import("Xdg2LayerShell.zig");
 
 wl_display: *c.wl_display,
@@ -11,6 +12,7 @@ wl_event_loop: *c.wl_event_loop,
 
 compositor: Compositor,
 shm: Shm,
+subcompositor: Subcompositor,
 xdg2layer_shell: Xdg2LayerShell,
 
 pub fn init(self: *Self) !void {

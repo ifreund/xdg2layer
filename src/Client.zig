@@ -70,19 +70,25 @@ fn handleGlobal(
     if (std.cstr.cmp(interface.?, @ptrCast([*:0]const u8, c.wl_shm_interface.name.?)) == 0) {
         const wl_shm = @ptrCast(
             *c.wl_shm,
-            c.wl_registry_bind(wl_registry, name, &c.wl_shm_interface, 1),
+            c.wl_registry_bind(wl_registry, name, &c.wl_shm_interface, version),
         );
         self.server.shm.init(self.server, wl_shm);
     } else if (std.cstr.cmp(interface.?, @ptrCast([*:0]const u8, c.wl_compositor_interface.name.?)) == 0) {
         const wl_compositor = @ptrCast(
             *c.wl_compositor,
-            c.wl_registry_bind(wl_registry, name, &c.wl_compositor_interface, 1),
+            c.wl_registry_bind(wl_registry, name, &c.wl_compositor_interface, version),
         );
         self.server.compositor.init(self.server, wl_compositor);
+    } else if (std.cstr.cmp(interface.?, @ptrCast([*:0]const u8, c.wl_subcompositor_interface.name.?)) == 0) {
+        const wl_subcompositor = @ptrCast(
+            *c.wl_subcompositor,
+            c.wl_registry_bind(wl_registry, name, &c.wl_subcompositor_interface, version),
+        );
+        self.server.subcompositor.init(self.server, wl_subcompositor, version);
     } else if (std.cstr.cmp(interface.?, @ptrCast([*:0]const u8, c.zwlr_layer_shell_v1_interface.name.?)) == 0) {
         const wlr_layer_shell = @ptrCast(
             *c.zwlr_layer_shell_v1,
-            c.wl_registry_bind(wl_registry, name, &c.zwlr_layer_shell_v1_interface, 1),
+            c.wl_registry_bind(wl_registry, name, &c.zwlr_layer_shell_v1_interface, version),
         );
         self.server.xdg2layer_shell.init(self.server, wlr_layer_shell);
     }
