@@ -29,8 +29,10 @@ wl_resource: *c.wl_resource,
 role: Role,
 
 pub fn init(self: *Self, xdg2layer_shell: *Xdg2LayerShell, wl_resource: *c.wl_resource, wl_surface: *c.wl_surface) void {
+    self.xdg2layer_shell = xdg2layer_shell;
     self.wl_resource = wl_resource;
     self.wl_surface = wl_surface;
+    self.role = .none;
     c.wl_resource_set_implementation(wl_resource, &interface, self, null);
 }
 

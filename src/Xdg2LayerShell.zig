@@ -28,15 +28,11 @@ pub fn init(self: *Self, server: *Server, wlr_layer_shell: *c.zwlr_layer_shell_v
 fn bind(wl_client: ?*c.wl_client, data: ?*c_void, version: u32, id: u32) callconv(.C) void {
     const self = @intToPtr(*Self, @ptrToInt(data));
 
-    const wl_resource = c.wl_resource_create(wl_client, &c.wl_shm_interface, 1, id) orelse {
+    const wl_resource = c.wl_resource_create(wl_client, &c.xdg_wm_base_interface, 3, id) orelse {
         c.wl_client_post_no_memory(wl_client);
         return;
     };
     c.wl_resource_set_implementation(wl_resource, &interface, self, null);
-
-    // TODO: listen for format event forward other formats
-    c.wl_shm_send_format(wl_resource, c.WL_SHM_FORMAT_ARGB8888);
-    c.wl_shm_send_format(wl_resource, c.WL_SHM_FORMAT_XRGB8888);
 }
 
 fn requestDestroy(wl_client: ?*c.wl_client, wl_resource: ?*c.wl_resource) callconv(.C) void {

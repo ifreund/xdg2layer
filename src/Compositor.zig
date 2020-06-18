@@ -16,11 +16,16 @@ const interface = c.struct_wl_compositor_interface{
 
 wl_compositor: *c.wl_compositor,
 
-pub fn init(self: *Self, server: *Server, wl_compositor: *c.wl_compositor) void {
+pub fn init(self: *Self, server: *Server, wl_compositor: *c.wl_compositor, version: u32) void {
     self.wl_compositor = wl_compositor;
 
-    _ = c.wl_global_create(server.wl_display, &c.wl_compositor_interface, 4, self, bind) orelse
-        @panic("compositor init failed");
+    _ = c.wl_global_create(
+        server.wl_display,
+        &c.wl_compositor_interface,
+        @intCast(c_int, version),
+        self,
+        bind,
+    ) orelse @panic("compositor init failed");
 }
 
 fn bind(wl_client: ?*c.wl_client, data: ?*c_void, version: u32, id: u32) callconv(.C) void {

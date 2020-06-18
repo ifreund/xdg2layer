@@ -13,17 +13,27 @@ const interface = c.struct_wl_shm_interface{
 
 wl_shm: *c.wl_shm,
 
-pub fn init(self: *Self, server: *Server, wl_shm: *c.wl_shm) void {
+pub fn init(self: *Self, server: *Server, wl_shm: *c.wl_shm, version: u32) void {
     self.wl_shm = wl_shm;
 
-    _ = c.wl_global_create(server.wl_display, &c.wl_shm_interface, 1, self, bind) orelse
-        @panic("shm init failed");
+    _ = c.wl_global_create(
+        server.wl_display,
+        &c.wl_shm_interface,
+        @intCast(c_int, version),
+        self,
+        bind,
+    ) orelse @panic("shm init failed");
 }
 
 fn bind(wl_client: ?*c.wl_client, data: ?*c_void, version: u32, id: u32) callconv(.C) void {
     const self = @intToPtr(*Self, @ptrToInt(data));
 
-    const wl_resource = c.wl_resource_create(wl_client, &c.wl_shm_interface, 1, id) orelse {
+    const wl_resource = c.wl_resource_create(
+        wl_client,
+        &c.wl_shm_interface,
+        @intCast(c_int, version),
+        id,
+    ) orelse {
         c.wl_client_post_no_memory(wl_client);
         return;
     };
