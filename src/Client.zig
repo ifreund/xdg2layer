@@ -14,6 +14,7 @@ server: *Server,
 wl_display: *c.wl_display,
 
 pub fn init(self: *Self, server: *Server) !void {
+    self.server = server;
     self.wl_display = c.wl_display_connect(null) orelse return error.ConnectFailure;
 
     const wl_registry = c.wl_display_get_registry(self.wl_display);
