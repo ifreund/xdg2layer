@@ -99,7 +99,13 @@ fn requestSetFullscreen(wl_client: ?*c.wl_client, wl_resource: ?*c.wl_resource, 
 fn requestUnsetFullscreen(wl_client: ?*c.wl_client, wl_resource: ?*c.wl_resource) callconv(.C) void {}
 fn requestSetMinimized(wl_client: ?*c.wl_client, wl_resource: ?*c.wl_resource) callconv(.C) void {}
 
-fn eventConfigure(data: ?*c_void, wlr_layer_surface: ?*c.zwlr_layer_surface_v1, serial: u32, width: u32, height: u32) callconv(.C) void {
+fn eventConfigure(
+    data: ?*c_void,
+    wlr_layer_surface: ?*c.zwlr_layer_surface_v1,
+    serial: u32,
+    width: u32,
+    height: u32,
+) callconv(.C) void {
     const self = @intToPtr(*Self, @ptrToInt(data));
     const server = self.xdg2layer_surface.xdg2layer_shell.server;
 
