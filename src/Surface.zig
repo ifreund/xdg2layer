@@ -28,9 +28,12 @@ const listener = c.wl_surface_listener{
 wl_surface: *c.wl_surface,
 wl_resource: *c.wl_resource,
 
+configured: bool,
+
 pub fn init(self: *Self, wl_surface: *c.wl_surface, wl_resource: *c.wl_resource) void {
     self.wl_surface = wl_surface;
     self.wl_resource = wl_resource;
+    self.configured = true;
     c.wl_resource_set_implementation(wl_resource, &interface, self, null);
     if (c.wl_surface_add_listener(wl_surface, &listener, self) < 0) @panic("failed to add listener");
 }
@@ -113,7 +116,7 @@ fn requestCommit(
     wl_resource: ?*c.wl_resource,
 ) callconv(.C) void {
     const self = @intToPtr(*Self, @ptrToInt(c.wl_resource_get_user_data(wl_resource)));
-    c.wl_surface_commit(self.wl_surface);
+    if (self.configured) c.wl_surface_commit(self.wl_surface);
 }
 
 fn requestSetBufferTransform(

@@ -2,6 +2,7 @@ const Self = @This();
 
 const c = @import("c.zig");
 
+const Client = @import("Client.zig");
 const Compositor = @import("Compositor.zig");
 const Shm = @import("Shm.zig");
 const Subcompositor = @import("Subcompositor.zig");
@@ -9,6 +10,8 @@ const Xdg2LayerShell = @import("Xdg2LayerShell.zig");
 
 wl_display: *c.wl_display,
 wl_event_loop: *c.wl_event_loop,
+
+client: Client,
 
 compositor: Compositor,
 shm: Shm,
@@ -20,6 +23,8 @@ pub fn init(self: *Self) !void {
 
     // Never returns null if the display was created successfully
     self.wl_event_loop = c.wl_display_get_event_loop(self.wl_display).?;
+
+    try self.client.init(self);
 }
 
 pub fn deinit(self: Self) void {

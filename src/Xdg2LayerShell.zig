@@ -68,7 +68,8 @@ fn requestGetXdgSurface(
         return;
     };
 
-    xdg2layer_surface.init(self, xdg_surface_resource, surface.wl_surface);
+    surface.configured = false;
+    xdg2layer_surface.init(self, xdg_surface_resource, surface);
 }
 
 fn requestPong(wl_client: ?*c.wl_client, wl_resource: ?*c.wl_resource, serial: u32) callconv(.C) void {

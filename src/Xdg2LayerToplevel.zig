@@ -57,6 +57,9 @@ pub fn init(
     self.serial_map = std.AutoHashMap(u32, u32).init(util.allocator);
 
     c.zwlr_layer_surface_v1_set_size(self.wlr_layer_surface, 128, 128);
+    c.wl_surface_commit(self.xdg2layer_surface.surface.wl_surface);
+    self.pending_width = 128;
+    self.pending_height = 128;
 
     if (c.zwlr_layer_surface_v1_add_listener(wlr_layer_surface, &listener, self) < 0)
         @panic("failed to add layer surface listener");
@@ -65,6 +68,12 @@ pub fn init(
 pub fn handleAckConfigure(self: *Self, serial: u32) void {
     const layer_serial = self.serial_map.remove(serial).?.value;
     c.zwlr_layer_surface_v1_ack_configure(self.wlr_layer_surface, layer_serial);
+
+    const surface = self.xdg2layer_surface.surface;
+    if (!surface.configured) {
+        surface.configured = true;
+        c.wl_surface_commit(surface.wl_surface);
+    }
 }
 
 fn requestDestroy(wl_client: ?*c.wl_client, wl_resource: ?*c.wl_resource) callconv(.C) void {
@@ -99,7 +108,13 @@ fn eventConfigure(data: ?*c_void, wlr_layer_surface: ?*c.zwlr_layer_surface_v1, 
     if ((width == self.current_width and height == self.current_height) or
         (width == self.pending_width and height == self.pending_height))
     {
+        const surface = self.xdg2layer_surface.surface;
         c.zwlr_layer_surface_v1_ack_configure(wlr_layer_surface, serial);
+        if (!surface.configured) {
+            surface.configured = true;
+            c.wl_surface_commit(surface.wl_surface);
+        }
+        _ = c.wl_display_flush(server.client.wl_display);
         return;
     }
 

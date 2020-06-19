@@ -5,6 +5,7 @@ const std = @import("std");
 const c = @import("c.zig");
 const util = @import("util.zig");
 
+const Surface = @import("Surface.zig");
 const Xdg2LayerShell = @import("Xdg2LayerShell.zig");
 const Xdg2LayerToplevel = @import("Xdg2LayerToplevel.zig");
 
@@ -24,14 +25,14 @@ const interface = c.struct_xdg_surface_interface{
 };
 
 xdg2layer_shell: *Xdg2LayerShell,
-wl_surface: *c.wl_surface,
+surface: *Surface,
 wl_resource: *c.wl_resource,
 role: Role,
 
-pub fn init(self: *Self, xdg2layer_shell: *Xdg2LayerShell, wl_resource: *c.wl_resource, wl_surface: *c.wl_surface) void {
+pub fn init(self: *Self, xdg2layer_shell: *Xdg2LayerShell, wl_resource: *c.wl_resource, surface: *Surface) void {
     self.xdg2layer_shell = xdg2layer_shell;
     self.wl_resource = wl_resource;
-    self.wl_surface = wl_surface;
+    self.surface = surface;
     self.role = .none;
     c.wl_resource_set_implementation(wl_resource, &interface, self, null);
 }
@@ -68,7 +69,7 @@ fn requestGetToplevel(
 
     const wlr_layer_surface = c.zwlr_layer_shell_v1_get_layer_surface(
         self.xdg2layer_shell.wlr_layer_shell,
-        self.wl_surface,
+        self.surface.wl_surface,
         null,
         c.ZWLR_LAYER_SHELL_V1_LAYER_TOP,
         "xdg2layer",
