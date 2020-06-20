@@ -28,7 +28,12 @@ pub fn init(self: *Self, server: *Server, wlr_layer_shell: *c.zwlr_layer_shell_v
 fn bind(wl_client: ?*c.wl_client, data: ?*c_void, version: u32, id: u32) callconv(.C) void {
     const self = @intToPtr(*Self, @ptrToInt(data));
 
-    const wl_resource = c.wl_resource_create(wl_client, &c.xdg_wm_base_interface, 3, id) orelse {
+    const wl_resource = c.wl_resource_create(
+        wl_client,
+        &c.xdg_wm_base_interface,
+        @intCast(c_int, version),
+        id,
+    ) orelse {
         c.wl_client_post_no_memory(wl_client);
         return;
     };
