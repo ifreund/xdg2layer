@@ -23,9 +23,12 @@ pub fn build(b: *std.build.Builder) void {
 
     exe.step.dependOn(&scan_protocols.step);
     exe.addIncludeDir("protocol");
-    exe.addCSourceFile("protocol/wlr-layer-shell-unstable-v1-protocol.c", &[_][]const u8{"-std=c99"});
-    exe.addCSourceFile("protocol/xdg-shell-protocol.c", &[_][]const u8{"-std=c99"});
-    exe.addCSourceFile("protocol/linux-dmabuf-unstable-v1-protocol.c", &[_][]const u8{"-std=c99"});
+    for ([_][]const u8{
+        "protocol/linux-dmabuf-unstable-v1-protocol.c",
+        "protocol/wayland-drm-protocol.c",
+        "protocol/wlr-layer-shell-unstable-v1-protocol.c",
+        "protocol/xdg-shell-protocol.c",
+    }) |file| exe.addCSourceFile(file, &[_][]const u8{"-std=c99"});
 
     exe.install();
 
@@ -64,15 +67,18 @@ const ScanProtocolsStep = struct {
             &[_][]const u8{ protocol_dir, "stable/xdg-shell/xdg-shell.xml" },
             &[_][]const u8{ protocol_dir, "unstable/linux-dmabuf/linux-dmabuf-unstable-v1.xml" },
             &[_][]const u8{ "protocol", "wlr-layer-shell-unstable-v1.xml" },
+            &[_][]const u8{ "protocol", "wayland-drm.xml" },
         };
 
         const server_protocols = [_][]const u8{
             "linux-dmabuf-unstable-v1",
+            "wayland-drm",
             "xdg-shell",
         };
 
         const client_protocols = [_][]const u8{
             "linux-dmabuf-unstable-v1",
+            "wayland-drm",
             "wlr-layer-shell-unstable-v1",
         };
 
