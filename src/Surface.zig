@@ -3,7 +3,6 @@ const Self = @This();
 const c = @import("c.zig");
 const util = @import("util.zig");
 
-const Buffer = @import("Buffer.zig");
 const Callback = @import("Callback.zig");
 const Region = @import("Region.zig");
 
@@ -53,8 +52,8 @@ fn requestAttach(
     y: i32,
 ) callconv(.C) void {
     const self = @intToPtr(*Self, @ptrToInt(c.wl_resource_get_user_data(wl_resource)));
-    const buffer = @intToPtr(*Buffer, @ptrToInt(c.wl_resource_get_user_data(buffer_resource)));
-    c.wl_surface_attach(self.wl_surface, buffer.wl_buffer, x, y);
+    const wl_buffer = @intToPtr(*c.wl_buffer, @ptrToInt(c.wl_resource_get_user_data(buffer_resource)));
+    c.wl_surface_attach(self.wl_surface, wl_buffer, x, y);
 }
 
 fn requestDamage(

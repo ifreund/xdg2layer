@@ -2,8 +2,7 @@ const Self = @This();
 
 const c = @import("c.zig");
 const util = @import("util.zig");
-
-const Buffer = @import("Buffer.zig");
+const buffer = @import("buffer.zig");
 
 const interface = c.struct_wl_shm_pool_interface{
     .create_buffer = requestCreateBuffer,
@@ -30,21 +29,14 @@ fn requestCreateBuffer(
     stride: i32,
     format: u32,
 ) callconv(.C) void {
-    const self = @intToPtr(*Self, @ptrToInt(c.wl_resource_get_user_data(wl_resource)));
+    const wl_shm_pool = @intToPtr(*Self, @ptrToInt(c.wl_resource_get_user_data(wl_resource))).wl_shm_pool;
 
-    const buffer = util.allocator.create(Buffer) catch {
+    const wl_buffer = c.wl_shm_pool_create_buffer(wl_shm_pool, offset, width, height, stride, format) orelse {
         c.wl_client_post_no_memory(wl_client);
         return;
     };
 
-    const buffer_resource = c.wl_resource_create(wl_client, &c.wl_buffer_interface, 1, id) orelse {
-        c.wl_client_post_no_memory(wl_client);
-        util.allocator.destroy(buffer);
-        return;
-    };
-    const wl_buffer = c.wl_shm_pool_create_buffer(self.wl_shm_pool, offset, width, height, stride, format).?;
-
-    buffer.init(wl_buffer, buffer_resource);
+    _ = buffer.create(wl_client.?, wl_buffer, id) catch c.wl_client_post_no_memory(wl_client);
 }
 
 fn requestDestroy(wl_client: ?*c.wl_client, wl_resource: ?*c.wl_resource) callconv(.C) void {

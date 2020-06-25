@@ -73,6 +73,8 @@ fn handleGlobal(
             c.wl_registry_bind(wl_registry, name, &c.wl_shm_interface, version),
         );
         self.server.shm.init(self.server, wl_shm, version);
+    } else if (std.cstr.cmp(interface.?, @ptrCast([*:0]const u8, c.zwp_linux_dmabuf_v1_interface.name.?)) == 0) {
+        @import("linux_dmabuf.zig").init(self.server.wl_display, wl_registry.?, name, version);
     } else if (std.cstr.cmp(interface.?, @ptrCast([*:0]const u8, c.wl_compositor_interface.name.?)) == 0) {
         const wl_compositor = @ptrCast(
             *c.wl_compositor,
