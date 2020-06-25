@@ -57,6 +57,7 @@ pub fn init(
     self.serial_map = std.AutoHashMap(u32, u32).init(util.allocator);
 
     c.zwlr_layer_surface_v1_set_size(self.wlr_layer_surface, 128, 128);
+    c.zwlr_layer_surface_v1_set_anchor(self.wlr_layer_surface, 1);
     c.wl_surface_commit(self.xdg2layer_surface.surface.wl_surface);
     self.pending_width = 128;
     self.pending_height = 128;
