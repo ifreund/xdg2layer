@@ -52,16 +52,20 @@ const ScanProtocolsStep = struct {
     fn init(builder: *std.build.Builder) ScanProtocolsStep {
         return ScanProtocolsStep{
             .builder = builder,
-            .step = std.build.Step.init("Scan Protocols", builder.allocator, make),
+            .step = std.build.Step.init(.Custom, "Scan Protocols", builder.allocator, make),
         };
     }
 
     fn make(step: *std.build.Step) !void {
         const self = @fieldParentPtr(ScanProtocolsStep, "step", step);
 
-        const protocol_dir = std.fmt.trim(try self.builder.exec(
-            &[_][]const u8{ "pkg-config", "--variable=pkgdatadir", "wayland-protocols" },
-        ));
+        const protocol_dir = std.mem.trim(
+            u8,
+            try self.builder.exec(
+                &[_][]const u8{ "pkg-config", "--variable=pkgdatadir", "wayland-protocols" },
+            ),
+            &std.ascii.spaces,
+        );
 
         const protocol_dir_paths = [_][]const []const u8{
             &[_][]const u8{ protocol_dir, "stable/xdg-shell/xdg-shell.xml" },
